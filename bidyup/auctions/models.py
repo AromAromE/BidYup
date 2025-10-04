@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-# กรณีอยากใช้ User เองแทน Django default
+# ใช้ User เองแทน Django default
 class User(AbstractUser):
     ROLE_CHOICES = (
         ('Seller', 'Seller'),
@@ -29,7 +29,7 @@ class Item(models.Model):
     )
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
-    image = models.CharField(max_length=255, blank=True, null=True)  # หรือ ImageField
+    image = models.FileField(upload_to="items/", blank=True, null=True)
     starting_price = models.DecimalField(max_digits=10, decimal_places=2)
     current_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     end_time = models.DateTimeField()

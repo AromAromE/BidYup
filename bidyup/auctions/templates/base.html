@@ -1,0 +1,44 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}BidYup{% endblock %}</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-gray-800">
+
+{% load static %}
+
+<header class="bg-gray-900 text-gray-100 shadow-lg">
+  <div class="container mx-auto flex justify-between items-center px-6 py-4">
+
+    <a href="/" class="flex items-center space-x-3">
+      <img src="{% static 'images/BidYup.png' %}" alt="BidYup Logo" class="w-12 h-12 rounded-md">
+      <span class="text-xl font-semibold tracking-wide hover:text-blue-400 transition-colors">BidYup</span>
+    </a>
+
+    <nav class="flex items-center space-x-4">
+      {% if user.is_authenticated %}
+        <span class="hidden sm:inline-block text-gray-300">สวัสดี {{ user.username }}</span>
+        <a href="/logout" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition text-gray-200">ออกจากระบบ</a>
+      {% else %}
+        <a href="/login" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition text-white shadow">เข้าสู่ระบบ</a>
+        <a href="/register" class="px-4 py-2 border border-blue-500 hover:bg-blue-600 hover:text-white rounded-lg font-medium transition text-blue-400">สมัครสมาชิก</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+
+
+  <main class="container mx-auto mt-8 px-4">
+    {% block content %}
+    {% endblock %}
+  </main>
+
+</body>
+</html>
