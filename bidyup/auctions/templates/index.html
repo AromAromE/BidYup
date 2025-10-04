@@ -7,7 +7,7 @@
   {% if items %}
   <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
     {% for item in items %}
-    <div class="bg-gray-800/70 backdrop-blur-lg rounded-2xl shadow-lg overflow-hidden border border-gray-700 hover:border-blue-500/60 transition-all duration-300 transform hover:-translate-y-2">
+    <div class="bg-gray-800/75 backdrop-blur-lg rounded-2xl shadow-lg overflow-hidden border-2 border-gray-800 hover:border-blue-500/60 transition-all duration-300 transform hover:-translate-y-2">
       <img src="{{ item.image.url }}" alt="{{ item.title }}" class="w-full h-52 object-cover">
       <div class="p-5">
         <h3 class="text-xl font-semibold mb-1 text-blue-400">{{ item.title }}</h3>

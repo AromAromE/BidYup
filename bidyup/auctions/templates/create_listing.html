@@ -10,7 +10,6 @@
       {% csrf_token %}
       {{ form.non_field_errors }}
 
-      <!-- Render all fields except image -->
       {% for field in form %}
         {% if field.name != 'image' %}
           <div>
@@ -21,11 +20,9 @@
         {% endif %}
       {% endfor %}
 
-      <!-- Custom Image Upload -->
       <div>
         <label class="block text-gray-300 mb-1">รูปภาพสินค้า</label>
 
-        <!-- Custom button -->
         <label for="id_image"
                class="inline-flex items-center justify-center w-full px-6 py-3 bg-gradient-to-r from-orange-400 to-red-500
                       hover:from-orange-500 hover:to-red-600 text-white font-semibold rounded-lg
@@ -35,16 +32,13 @@
           📸 เลือกรูปภาพ
         </label>
 
-        <!-- Preview image -->
          {{ form.image }}
         <img id="preview" class="m-auto mt-3 rounded-lg border max-h-64 object-contain hidden" alt="Preview" />
 
-        <!-- Hidden file input -->
         <input type="file" id="id_image" name="image" class="absolute w-0 h-0 opacity-0">
         <p class="text-red-400 text-sm mt-1">{{ form.image.errors }}</p>
       </div>
 
-      <!-- Submit button -->
       <button type="submit"
               class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg
                      shadow-lg transform transition active:scale-95">
