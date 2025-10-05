@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
-from .models import Item
+from .models import Item, Bid
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 
@@ -10,9 +10,6 @@ ROLE_CHOICES = (
     ('buyer', 'Buyer'),
     ('seller', 'Seller'),
 )
-
-from django import forms
-from django.contrib.auth.forms import AuthenticationForm
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
@@ -27,7 +24,6 @@ class LoginForm(AuthenticationForm):
             'placeholder': 'Password'
         })
     )
-
 
 class RegisterForm(UserCreationForm):
     username = forms.CharField(
@@ -97,7 +93,6 @@ class RegisterForm(UserCreationForm):
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2', 'phone', 'address']
 
-
 class CreateForm(forms.ModelForm):
     class Meta:
         model = Item
@@ -128,3 +123,19 @@ class CreateForm(forms.ModelForm):
                 'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-green-500 appearance-none',
             }),
         }
+
+class BidForm(forms.ModelForm):
+    class Meta:
+        model = Bid
+        fields = ["amount"]
+
+    def __init__(self, *args, **kwargs):
+        current_price = kwargs.pop("current_price", 0)
+        super().__init__(*args, **kwargs)
+        # Just use HTML5 min for validation
+        self.fields["amount"].widget.attrs.update({
+            "class": "w-full p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500",
+            "placeholder": "ใส่ราคาที่คุณต้องการเสนอ",
+            "step": "0.01",
+            "min": current_price + 0.01,  # HTML will enforce this
+        })

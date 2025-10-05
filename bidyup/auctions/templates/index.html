@@ -19,7 +19,7 @@
           <p>⏰ สิ้นสุด: {{ item.end_time|date:"d/m/Y H:i" }}</p>
         </div>
 
-        <a href="#" class="mt-4 block text-center py-2.5 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white font-semibold rounded-lg shadow-md transition">
+        <a href="{% url "item" item.pk %}" class="mt-4 block text-center py-2.5 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white font-semibold rounded-lg shadow-md transition">
           ดูรายละเอียด
         </a>
       </div>
