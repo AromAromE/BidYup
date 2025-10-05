@@ -1,9 +1,11 @@
 {% extends "base.html" %}
+{% load humanize %}
 {% block title %}{{ item.title }} | BidYup{% endblock %}
 
 {% block content %}
 <div class="min-h-screen flex justify-center py-12 px-4">
   <div class="w-full max-w-3xl bg-gray-800/80 rounded-2xl shadow-xl p-8 border border-gray-700">
+
     {% if messages %}
       <div class="space-y-2 mb-4">
         {% for message in messages %}
@@ -22,27 +24,50 @@
       <div class="flex-1">
         <h2 class="text-3xl font-bold text-blue-400 mb-2">{{ item.title }}</h2>
         <p class="text-gray-300 mb-4">{{ item.description }}</p>
-        <p class="text-gray-400 mb-1">💰 ราคาเริ่มต้น: {{ item.starting_price }} บาท</p>
-        <p class="text-gray-400 mb-1">📈 ราคาปัจจุบัน: {{ item.current_price|default:item.starting_price }} บาท</p>
+        <p class="text-gray-400 mb-1">💰 ราคาเริ่มต้น: {{ item.starting_price|intcomma }} บาท</p>
+        <p class="text-gray-400 mb-1">
+          📈 ราคาปัจจุบัน: 
+          <span id="current-bid">{{ item.current_price|default:item.starting_price|intcomma }}</span> บาท
+        </p>
         <p class="text-gray-400 mb-4">⏰ ปิดประมูล: {{ item.end_time|date:"d/m/Y H:i" }}</p>
 
-        {% if item.status == "active" %}
-        <form method="POST" class="space-y-3">
-            {% csrf_token %}
-            <input type="number" name="bid_amount"
-                min="{{ item.current_price|default:item.starting_price|add:1 }}"
-                step="1"
-                class="w-full p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500"
-                placeholder="ใส่ราคาที่คุณต้องการเสนอ"
-                required>
-            <button type="submit"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition">
-            เสนอราคา
-            </button>
-        </form>
-        {% else %}
-        <p class="text-red-400 mt-4">🔒 การประมูลนี้ปิดแล้ว</p>
-        {% endif %}
+      {% if item.status == "active" %}
+          {% if user == item.seller %}
+              <!-- ผู้ขายไม่สามารถ bid ได้ -->
+              <p class="text-yellow-400 mt-2">⚠️ คุณไม่สามารถประมูลสินค้าของตัวเองได้</p>
+
+              <!-- ปุ่มแก้ไข/ลบ แสดงเฉพาะเจ้าของ -->
+              <div class="flex flex-col gap-3 mt-4">
+                  <a href="" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg text-center transition">
+                      แก้ไขสินค้า
+                  </a>
+                  <form method="POST" action="">
+                      {% csrf_token %}
+                      <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition">
+                          ลบสินค้า
+                      </button>
+                  </form>
+              </div>
+          {% else %}
+              <!-- ผู้ซื้อทั่วไป สามารถ bid ได้ -->
+              {% if perms.auctions.add_bid %}
+                  <form method="POST" class="space-y-3">
+                      {% csrf_token %}
+                      {{ form.amount }}
+                      {% if form.errors.amount %}
+                          <div class="bg-red-600/80 text-white px-4 py-2 rounded-md text-center mt-1">
+                              {{ form.errors.amount.0 }}
+                          </div>
+                      {% endif %}
+                      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition">
+                          เสนอราคา
+                      </button>
+                  </form>
+              {% endif %}
+          {% endif %}
+      {% else %}
+          <p class="text-red-400 mt-4">🔒 การประมูลนี้ปิดแล้ว</p>
+      {% endif %}
 
       </div>
     </div>
@@ -54,12 +79,24 @@
       {% for bid in bids %}
         <div class="bg-gray-700/70 p-3 rounded-lg border border-gray-600">
           <p class="text-sm text-gray-300"><strong>{{ bid.bidder.username }}</strong> — {{ bid.time|date:"d/m/Y H:i" }}</p>
-          <p class="text-gray-200">💸 {{ bid.amount }} บาท</p>
+          <p class="text-gray-200">💸 {{ bid.amount|intcomma }} บาท</p>
         </div>
       {% empty %}
         <p class="text-gray-400 text-sm">ยังไม่มีการเสนอราคา</p>
       {% endfor %}
     </div>
+
   </div>
 </div>
+
+<script>
+setInterval(() => {
+  fetch(`/api/item/{{ item.id }}/current_bid/`)
+    .then(res => res.json())
+    .then(data => {
+      const formatted = Number(data.current_price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      document.querySelector("#current-bid").innerText = formatted;
+    });
+}, 3000);
+</script>
 {% endblock %}

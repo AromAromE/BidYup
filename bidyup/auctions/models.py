@@ -38,6 +38,7 @@ class Item(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="items")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    favorites = models.ManyToManyField(User, related_name='favorite_items', blank=True)
 
     def __str__(self):
         return self.title
@@ -65,10 +66,3 @@ class Order(models.Model):
     delivery_status = models.CharField(max_length=10, choices=DELIVERY_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-class Favourite(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="favourites")
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name="favourited_by")
-
-    class Meta:
-        unique_together = ('user', 'item')

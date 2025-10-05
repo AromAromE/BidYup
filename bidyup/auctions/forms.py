@@ -3,6 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from .models import Item, Bid
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
+from decimal import Decimal
 
 User = get_user_model()
 
@@ -130,12 +131,17 @@ class BidForm(forms.ModelForm):
         fields = ["amount"]
 
     def __init__(self, *args, **kwargs):
-        current_price = kwargs.pop("current_price", 0)
+        self.current_price = kwargs.pop("current_price", Decimal("0"))
         super().__init__(*args, **kwargs)
-        # Just use HTML5 min for validation
         self.fields["amount"].widget.attrs.update({
             "class": "w-full p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500",
             "placeholder": "ใส่ราคาที่คุณต้องการเสนอ",
-            "step": "0.01",
-            "min": current_price + 0.01,  # HTML will enforce this
         })
+
+    def clean_amount(self):
+        amount = self.cleaned_data.get("amount")
+        if amount <= self.current_price:
+            raise forms.ValidationError(
+                f"❌ ราคาต้องสูงกว่าราคาปัจจุบัน ({self.current_price})"
+            )
+        return amount
