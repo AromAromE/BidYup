@@ -22,6 +22,10 @@ def close_auction(item_id):
         # ส่งเมลหลังจาก commit แล้ว (อยู่นอก transaction)
         highest_bid = item.bids.order_by("-amount").first()
         winner = highest_bid.bidder if highest_bid else None
+        if highest_bid:
+            highest_bid.is_winner = True
+            highest_bid.save()
+        
         seller = item.seller
 
         if winner:
