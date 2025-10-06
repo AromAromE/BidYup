@@ -3,6 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from .models import Item, Bid
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
+from django.utils import timezone
 from decimal import Decimal
 
 User = get_user_model()
@@ -118,12 +119,19 @@ class CreateForm(forms.ModelForm):
             }),
             'end_time': forms.DateTimeInput(attrs={
                 'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500',
-                'type': 'datetime-local'
+                'type': 'datetime-local',
+                'min': timezone.now().strftime('%Y-%m-%dT%H:%M')
             }),
             'category': forms.Select(attrs={
                 'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-green-500 appearance-none',
             }),
         }
+    
+    def clean_end_time(self):
+        end_time = self.cleaned_data.get("end_time")
+        if end_time and end_time <= timezone.now():
+            raise forms.ValidationError("⏰ เวลาสิ้นสุดต้องอยู่ในอนาคตเท่านั้น")
+        return end_time
 
 class BidForm(forms.ModelForm):
     class Meta:

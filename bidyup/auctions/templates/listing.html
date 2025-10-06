@@ -33,23 +33,26 @@
 
       {% if item.status == "active" %}
           {% if user == item.seller %}
-              <!-- ผู้ขายไม่สามารถ bid ได้ -->
               <p class="text-yellow-400 mt-2">⚠️ คุณไม่สามารถประมูลสินค้าของตัวเองได้</p>
 
-              <!-- ปุ่มแก้ไข/ลบ แสดงเฉพาะเจ้าของ -->
               <div class="flex flex-col gap-3 mt-4">
-                  <a href="" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg text-center transition">
+                  <a href="{% url 'update_item' item.id %}" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg text-center transition">
                       แก้ไขสินค้า
                   </a>
-                  <form method="POST" action="">
+                  <form method="GET" action="{% url 'delete_item' item.pk %}">
                       {% csrf_token %}
                       <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition">
                           ลบสินค้า
                       </button>
                   </form>
+                  <form method="GET" action="{% url 'endlist' item.pk %}">
+                      {% csrf_token %}
+                      <button type="submit" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 rounded-lg transition">
+                          ปิดการประมูล
+                      </button>
+                  </form>
               </div>
           {% else %}
-              <!-- ผู้ซื้อทั่วไป สามารถ bid ได้ -->
               {% if perms.auctions.add_bid %}
                   <form method="POST" class="space-y-3">
                       {% csrf_token %}
