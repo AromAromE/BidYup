@@ -9,11 +9,10 @@
   <link rel="icon" href="{% static "images/BidYup.png" %}">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
+
 <body class="min-h-screen" style="background: linear-gradient(200deg, #1E293B 0%, #18181B 100%);">
 
-{% load static %}
-
-<header class="bg-gray-900 text-gray-100 shadow-lg">
+<header class="bg-gray-900 text-gray-100 shadow-lg pl-3">
   <div class="container mx-auto flex justify-between items-center px-6 py-4">
 
     <a href="/" class="flex items-center space-x-3">
@@ -21,24 +20,37 @@
       <span class="text-xl font-semibold tracking-wide hover:text-blue-400 transition-colors">BidYup</span>
     </a>
 
-    <nav class="flex items-center space-x-4">
-      {% if user.is_authenticated %}
-        <span class="hidden sm:inline-block text-gray-300">สวัสดี {{ user.username }}</span>
-        <a href="/logout" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition text-gray-200">ออกจากระบบ</a>
+  <nav class="flex items-center space-x-4">
+
+    {% if user.is_authenticated %}
+      {% if perms.auctions.add_item %}
+        <a href="/create" class="px-3 py-2 hover:text-blue-400 transition">เพิ่มสินค้า</a>
+        <a href="{% url 'myitem' %}" class="px-3 py-2 hover:text-blue-400 transition">สินค้าของฉัน</a>
       {% else %}
-        <a href="/login" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition text-white shadow">เข้าสู่ระบบ</a>
-        <a href="/register" class="px-4 py-2 border border-blue-500 hover:bg-blue-600 hover:text-white rounded-lg font-medium transition text-blue-400">สมัครสมาชิก</a>
+        <a href="/my-bids/" class="px-3 py-2 hover:text-blue-400 transition">การประมูลของฉัน</a>
+        <a href="/favorites/" class="px-3 py-2 hover:text-blue-400 transition">รายการโปรด</a>
       {% endif %}
-    </nav>
+
+      <a href="{% url 'profile' user.pk %}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
+        {{ user.username }}
+      </a>
+
+      <a href="/logout/" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-gray-200 transition">ออกจากระบบ</a>
+
+    {% else %}
+      <a href="/login/" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white shadow transition">เข้าสู่ระบบ</a>
+      <a href="/register/" class="px-4 py-2 border border-blue-500 hover:bg-blue-600 hover:text-white rounded-lg text-blue-400 transition">สมัครสมาชิก</a>
+    {% endif %}
+
+  </nav>
+
   </div>
 </header>
 
-
-
-  <main class="container mx-auto mt-8 px-4">
-    {% block content %}
-    {% endblock %}
-  </main>
+<main class="container mx-auto mt-8 px-4">
+  {% block content %}
+  {% endblock %}
+</main>
 
 </body>
 </html>

@@ -1,11 +1,10 @@
 {% extends "base.html" %}
-
 {% block title %}โปรไฟล์ | BidYup{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-[oklch(12.9%_0.042_264.695)]">
+<div class="min-h-screen flex justify-center py-12 px-4">
   <div class="w-full max-w-md bg-gray-800/80 rounded-2xl shadow-xl p-8 border border-gray-700">
-    <h2 class="text-3xl font-extrabold mb-6 text-center text-white">โปรไฟล์ของ {{ user.username }}</h2>
+    <h2 class="text-3xl font-bold text-blue-400 mb-6 text-center">โปรไฟล์ของ {{ user.username }}</h2>
 
     {% if form.non_field_errors %}
       <div class="bg-red-600/80 text-white px-4 py-2 rounded-md text-center font-semibold mb-4">
@@ -15,9 +14,8 @@
       </div>
     {% endif %}
 
-    <form method="post" class="space-y-4">
+    <form method="post">
       {% csrf_token %}
-
       {% for field in form %}
         <div class="mb-4">
           <label class="block text-gray-200 mb-1 font-medium">{{ field.label }}</label>
@@ -35,7 +33,7 @@
         </div>
       {% endfor %}
 
-      <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transform transition active:scale-95">
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition">
         อัปเดตโปรไฟล์
       </button>
     </form>

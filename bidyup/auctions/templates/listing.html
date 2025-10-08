@@ -78,7 +78,7 @@
     <hr class="my-6 border-gray-600">
 
     <h3 class="text-xl font-semibold text-gray-200 mb-3">📜 ประวัติการเสนอราคา</h3>
-    <div class="space-y-3">
+    <div id="bid-history" class="space-y-3">
       {% for bid in bids %}
         <div class="bg-gray-700/70 p-3 rounded-lg border border-gray-600">
           <p class="text-sm text-gray-300"><strong>{{ bid.bidder.username }}</strong> — {{ bid.time|date:"d/m/Y H:i" }}</p>
@@ -93,13 +93,35 @@
 </div>
 
 <script>
-setInterval(() => {
-  fetch(`/api/item/{{ item.id }}/current_bid/`)
+function updateBids() {
+  fetch(`/api/item/{{ item.id }}/current_and_bids/`)
     .then(res => res.json())
     .then(data => {
-      const formatted = Number(data.current_price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-      document.querySelector("#current-bid").innerText = formatted;
+      // ราคาปัจจุบัน
+      const formattedPrice = Number(data.current_price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      document.querySelector("#current-bid").innerText = formattedPrice;
+    
+      //รีประวัติการบิดทุกๆ 3 วินาที
+      const container = document.querySelector("#bid-history");
+      container.innerHTML = '';
+
+      if (data.bids.length === 0) {
+        container.innerHTML = `<p class="text-gray-400 text-sm">ยังไม่มีการเสนอราคา</p>`;
+      } else {
+        data.bids.forEach(bid => {
+          const div = document.createElement("div");
+          div.className = "bg-gray-700/70 p-3 rounded-lg border border-gray-600";
+          div.innerHTML = `
+            <p class="text-sm text-gray-300"><strong>${bid.bidder}</strong> — ${bid.time}</p>
+            <p class="text-gray-200">💸 ${Number(bid.amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท</p>
+          `;
+          container.appendChild(div);
+        });
+      }
     });
-}, 3000);
+}
+
+setInterval(updateBids, 3000);
 </script>
+
 {% endblock %}

@@ -11,20 +11,14 @@ urlpatterns = [
     path("register", views.RegisterView.as_view(), name="register"),
     path("create", views.CreateView.as_view(), name="create_listing"),
     path("item/<int:pk>", views.ListingDetailView.as_view(), name="listing"),
-    path("api/item/<int:item_id>/current_bid/", views.BidUpdateView, name='current_bid_api'),
+    path('api/item/<int:item_id>/current_and_bids/', views.CurrentdBidsAPIView, name='current_bids'),
     path("item/<int:pk>/update/", views.UpdateItemView.as_view(), name='update_item'),
     path("item/<int:pk>/delete/", views.DeleteItemView.as_view(), name='delete_item'),
     path("item/<int:pk>/end/>", views.EndAuctionView.as_view(), name="endlist"),
-#     path("categories", views.categories, name="categories"),
-#     path("categories/<str:category_name>", views.category_listings, name="category_listings"),
-#     path("watchlist", views.watchlist, name="watchlist"),
-#     path("watchlist/<int:listing_id>", views.toggle_watchlist, name="toggle_watchlist"),
-#     path("profile/<str:username>", views.profile, name="profile"),
-#     path("profile/<str:username>/watchlist", views.profile_watchlist, name="profile_watchlist"),
-#     path("profile/<str:username>/listings", views.profile_listings, name="profile_listings"),
-#     path("profile/<str:username>/comments", views.profile_comments, name="profile_comments"),
-#     path("profile/<str:username>/bids", views.profile_bids, name="profile_bids"),
-#     path("profile/<str:username>/won_auctions", views.profile_won_auctions, name="profile_won_auctions"),
+    path("myitem/", views.MyItemView.as_view(), name="myitem"),
+    path("mybid/", views.MyBidView.as_view(), name="mybid"),
+    path("profile/<int:pk>", views.ProfileView.as_view(), name="profile"),
+    path("favourite/", views.FavouriteView.as_view(), name="favourite")
 ]
 
 if settings.DEBUG:
