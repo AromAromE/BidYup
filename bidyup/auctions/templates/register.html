@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}โปรไฟล์ | BidYup{% endblock %}
+{% block title %}สมัครสมาชิก | BidYup{% endblock %}
 
 {% block content %}
 <div class="min-h-screen flex items-center justify-center bg-[oklch(12.9%_0.042_264.695)]">
   <div class="w-full max-w-md bg-gray-800/80 rounded-2xl shadow-xl p-8 border border-gray-700">
-    <h2 class="text-3xl font-extrabold mb-6 text-center text-white">โปรไฟล์ของ {{ user.username }}</h2>
+    <h2 class="text-3xl font-extrabold mb-6 text-center text-white">สมัครสมาชิก {{ user.username }}</h2>
 
     {% if form.non_field_errors %}
       <div class="bg-red-600/80 text-white px-4 py-2 rounded-md text-center font-semibold mb-4">
@@ -36,7 +36,7 @@
       {% endfor %}
 
       <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transform transition active:scale-95">
-        อัปเดตโปรไฟล์
+        สมัครสมาชิก
       </button>
     </form>
   </div>

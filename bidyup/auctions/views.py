@@ -1,13 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth import login, logout
-from .forms import LoginForm, CreateForm, RegisterForm, BidForm, ProfileForm
+from .forms import LoginForm, CreateForm, RegisterForm, BidForm, ProfileForm, CustomPasswordChangeForm
 from .models import *
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from django.db import transaction
 
 from django.contrib import messages
+from django.contrib.auth.views import PasswordChangeView
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
@@ -31,14 +32,13 @@ class IndexView(View):
         category_id = request.GET.get("category", "")
 
         items = Item.objects.filter(status="active").order_by("-created_at")
-
         if cat:
             items = items.filter(title__icontains=cat)
 
         if category_id:
             items = items.filter(category_id=category_id)
 
-        categories = Category.objects.annotate(ic=Count('items'))
+        categories = Category.objects.annotate(ic=Count('items', filter=Q(items__status='active')))
 
         return render(request, "index.html", {"items": items, "categories": categories,})
 
@@ -85,7 +85,7 @@ class LogoutView(View):
         logout(request)
         return redirect("login")
 
-class CreateView(PermissionRequiredMixin, View):
+class CreateView(LoginRequiredMixin, PermissionRequiredMixin, View):
     permission_required = ["auctions.add_item"]
     def get(self, request):
         form = CreateForm()
@@ -109,11 +109,8 @@ class ListingDetailView(LoginRequiredMixin, View):
         item = get_object_or_404(Item, pk=pk)
         bids = item.bids.order_by("-amount")
         form = BidForm(current_price=item.current_price or item.starting_price)
-        return render(request, "listing.html", {
-            "item": item,
-            "bids": bids,
-            "form": form,
-        })
+        is_favorite = request.user.is_authenticated and item.favorites.filter(id=request.user.id).exists()
+        return render(request, "listing.html", {"item": item, "bids": bids, "form": form, "is_favorite": is_favorite})
 
     def post(self, request, pk):
         item = get_object_or_404(Item, pk=pk)
@@ -139,12 +136,8 @@ class ListingDetailView(LoginRequiredMixin, View):
             return redirect("listing", pk=item.pk)
 
         bids = item.bids.order_by("-amount")
-        return render(request, "listing.html", {
-            "item": item,
-            "bids": bids,
-            "form": form,
-        })
-class UpdateItemView(View):
+        return render(request, "listing.html", { "item": item, "bids": bids, "form": form, })
+class UpdateItemView(LoginRequiredMixin, View):
     def get(self, request, pk):
         item = Item.objects.get(pk=pk)
         form = CreateForm(instance=item)
@@ -162,7 +155,7 @@ class UpdateItemView(View):
             return redirect("listing", pk=item.pk)
         return render(request, "update_item.html", {"form": form, "pk": pk})
 
-class DeleteItemView(View):
+class DeleteItemView(LoginRequiredMixin, View):
     def get(self, request, pk):
         item = get_object_or_404(Item, pk=pk)
 
@@ -180,7 +173,7 @@ class DeleteItemView(View):
         item.delete()
         return redirect("index")
     
-class EndAuctionView(View):
+class EndAuctionView(LoginRequiredMixin, View):
     def get(self, request, pk):
         item = get_object_or_404(Item, pk=pk)
 
@@ -207,6 +200,15 @@ class EndAuctionView(View):
                 if highest_bid:
                     highest_bid.is_winner = True
                     highest_bid.save()
+                
+                #สร้าง order หลังปิดประมูล
+                if winner:
+                    Order.objects.create(
+                        item=item,
+                        buyer=winner,
+                        payment_status="pending",
+                        delivery_status="pending"
+                    )
 
                 seller = item.seller
 
@@ -282,18 +284,21 @@ class MyItemView(PermissionRequiredMixin, View):
         items = Item.objects.filter(status="active", seller=request.user).order_by("-created_at")
         return render(request, "myitem.html", {"items": items})
 
-class MyBidView(View):
-    def get():
-        pass
-    def post():
-        pass
+class MyBidView(LoginRequiredMixin, View):
+    def get(self, request):
+        user = request.user
 
-class ProfileView(View):
+        bid_items = Item.objects.filter(bids__bidder=user).distinct()
+
+        won_items = Item.objects.filter(bids__bidder=user, bids__is_winner=True).distinct()
+
+        return render(request, "mybid.html", {"bid_items": bid_items, "won_items": won_items})
+
+class ProfileView(LoginRequiredMixin, View):
     def get(self, request, pk):
         user = get_object_or_404(User, pk=pk)
         if user.pk != request.user.pk: 
             raise PermissionDenied
-        user = get_object_or_404(User, pk=pk)
         form = ProfileForm(instance=user)
         return render(request, "profile.html", {"form": form, "user": user})
 
@@ -308,8 +313,74 @@ class ProfileView(View):
             return redirect("profile", pk=user.pk)
         return render(request, "profile.html", {"form": form, "user": user})
 
-class FavouriteView(View):
-    def get():
-        pass
-    def post():
-        pass
+
+class ChangePasswordView(PasswordChangeView):
+    form_class = CustomPasswordChangeForm
+    template_name = 'change_password.html'
+
+    def get_success_url(self):
+        messages.success(self.request, "เปลี่ยนรหัสผ่านเรียบร้อยแล้ว!")
+        return redirect('index')
+
+class FavouriteView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        if pk != request.user.pk:
+            raise PermissionDenied
+        user = get_object_or_404(User, pk=pk)
+        favourites = Item.objects.filter(favorites=user).order_by('-created_at')
+        return render(request, "favorites.html", {"user": user, "favourites": favourites})
+
+    
+class ToggleFavouriteView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    permission_required = ["auctions.add_bid"]
+    def post(self, request, pk):
+        item = get_object_or_404(Item, pk=pk)
+        user = request.user
+        if item.favorites.filter(id=user.id).exists():
+            item.favorites.remove(user)
+        else:
+            item.favorites.add(user)
+
+        return redirect('listing', pk=pk)
+    
+class SellerStatusView(LoginRequiredMixin, View):
+    def get(self, request):
+        if request.user.role.lower() != "seller":
+            raise PermissionDenied
+
+        orders = Order.objects.filter(item__seller=request.user, item__status="closed").order_by("-item__end_time")
+        return render(request, "status_seller.html", {"orders": orders})
+
+    def post(self, request):
+        if request.user.role.lower() != "seller":
+            raise PermissionDenied
+
+        order_id = request.POST.get("order_id")
+        order = get_object_or_404(Order, pk=order_id, item__seller=request.user, item__status="closed")
+
+        order.payment_status = "confirmed"
+        order.save()
+        messages.success(request, f"✅ ทำเครื่องหมายชำระเงินเรียบร้อย: {order.item.title}")
+        return redirect("status-seller")
+
+
+class BuyerStatusView(LoginRequiredMixin, View):
+    def get(self, request):
+        if request.user.role.lower() == "seller":
+            raise PermissionDenied
+
+        orders = Order.objects.filter(buyer=request.user, item__status="closed").order_by("-item__end_time")
+        return render(request, "status_buyer.html", {"orders": orders})
+
+    def post(self, request):
+        if request.user.role.lower() == "seller":
+            raise PermissionDenied
+
+        order_id = request.POST.get("order_id")
+        order = get_object_or_404(Order, pk=order_id, buyer=request.user, item__status="closed")
+
+        order.delivery_status = "delivered"
+        order.save()
+        messages.success(request, f"✅ ทำเครื่องหมายได้รับสินค้าเรียบร้อย: {order.item.title}")
+        return redirect("status-buyer")
+

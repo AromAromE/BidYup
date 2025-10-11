@@ -1,129 +1,147 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, PasswordChangeForm
 from .models import Item, Bid
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserCreationForm
 from django.utils import timezone
 from decimal import Decimal
 
 User = get_user_model()
 
 ROLE_CHOICES = (
-    ('buyer', 'Buyer'),
-    ('seller', 'Seller'),
+    ("buyer", "Buyer"),
+    ("seller", "Seller"),
 )
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
+        label="ชื่อผู้ใช้",
         widget=forms.TextInput(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'Username'
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "ชื่อผู้ใช้"   
         })
     )
     password = forms.CharField(
+        label="รหัสผ่าน   ",
         widget=forms.PasswordInput(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'Password'
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "รหัสผ่าน"
         })
     )
 
 class RegisterForm(UserCreationForm):
     username = forms.CharField(
+        label="ชื่อผู้ใช้",
         widget=forms.TextInput(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'Username'
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "ชื่อผู้ใช้"
         })
     )
     first_name = forms.CharField(
+        label="ชื่อจริง",
         required=True,
         widget=forms.TextInput(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'First Name'
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "ชื่อจริง"
         })
     )
     last_name = forms.CharField(
+        label="นามสกุล",
         required=True,
         widget=forms.TextInput(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'Last Name'
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "นามสกุล"
         })
     )
     email = forms.EmailField(
+        label="อีเมล",
         required=True,
         widget=forms.EmailInput(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'Email'
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "อีเมล"
         })
     )
     password1 = forms.CharField(
-        label="Password",
+        label="รหัสผ่าน",
         widget=forms.PasswordInput(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'Password'
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "รหัสผ่าน"
         })
     )
     password2 = forms.CharField(
-        label="Confirm Password",
+        label="ยืนยันรหัสผ่าน",
         widget=forms.PasswordInput(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'Confirm Password'
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "ยืนยันรหัสผ่าน"
         })
     )
     role = forms.ChoiceField(
+        label="บทบาท",
         choices=ROLE_CHOICES,
         widget=forms.Select(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-green-500 appearance-none',
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-green-500 appearance-none",
         })
     )
     phone = forms.CharField(
+        label="เบอร์โทรศัพท์",
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'เบอร์โทรศัพท์ (ไม่บังคับ)'
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "เบอร์โทรศัพท์ (ไม่บังคับ)"
         })
     )
     address = forms.CharField(
+        label="ที่อยู่",
         required=False,
         widget=forms.Textarea(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'ที่อยู่ (ไม่บังคับ)',
-            'rows': 3
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "ที่อยู่ (ไม่บังคับ)",
+            "rows": 3
         })
     )
 
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2', 'phone', 'address']
+        fields = ["username", "first_name", "last_name", "email","password1", "password2"]
 
 class CreateForm(forms.ModelForm):
     class Meta:
         model = Item
-        fields = ['title', 'description', 'starting_price', 'image', 'end_time', 'category']
+        fields = ["title", "description", "starting_price", "image", "end_time", "category"]
 
+        labels = {
+            "title": "ชื่อสินค้า",
+            "description": "รายละเอียดสินค้า",
+            "starting_price": "ราคาเริ่มต้น",
+            "image": "รูปภาพสินค้า",
+            "end_time": "เวลาสิ้นสุดการประมูล",
+            "category": "หมวดหมู่",
+        }
+    
         widgets = {
-            'title': forms.TextInput(attrs={
-                'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500',
-                'placeholder': 'ชื่อสินค้า'
+            "title": forms.TextInput(attrs={
+                "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500",
+                "placeholder": "ชื่อสินค้า"
             }),
-            'description': forms.Textarea(attrs={
-                'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500',
-                'rows': 4,
-                'placeholder': 'รายละเอียดสินค้า'
+            "description": forms.Textarea(attrs={
+                "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500",
+                "rows": 4,
+                "placeholder": "รายละเอียดสินค้า"
             }),
-            'starting_price': forms.NumberInput(attrs={
-                'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500',
-                'placeholder': 'ราคาเริ่มต้น'
+            "starting_price": forms.NumberInput(attrs={
+                "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500",
+                "placeholder": "ราคาเริ่มต้น"
             }),
-            'image': forms.ClearableFileInput(attrs={
-                # 'class': 'hidden'
+            "image": forms.ClearableFileInput(attrs={
+                "class": "hidden",
+                "id": "id_image"
             }),
-            'end_time': forms.DateTimeInput(attrs={
-                'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500',
-                'type': 'datetime-local',
-                'min': timezone.now().strftime('%Y-%m-%dT%H:%M')
+            "end_time": forms.DateTimeInput(attrs={
+                "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500",
+                "type": "datetime-local",
+                "min": timezone.now().strftime("%Y-%m-%dT%H:%M")
             }),
-            'category': forms.Select(attrs={
-                'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-green-500 appearance-none',
+            "category": forms.Select(attrs={
+                "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-green-500 appearance-none",
             }),
         }
     
@@ -157,81 +175,80 @@ class BidForm(forms.ModelForm):
 
 class ProfileForm(forms.ModelForm):
     username = forms.CharField(
+        label="ชื่อผู้ใช้",
         widget=forms.TextInput(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'Username'
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "Username"
         })
     )
     first_name = forms.CharField(
         required=True,
+        label="ชื่อจริง",
         widget=forms.TextInput(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'First Name'
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "First Name"
         })
     )
     last_name = forms.CharField(
         required=True,
+        label="นามสกุล",
         widget=forms.TextInput(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'Last Name'
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "Last Name"
         })
     )
     email = forms.EmailField(
         required=True,
+        label="อีเมล",
         widget=forms.EmailInput(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'Email'
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "Email"
         })
     )
     phone = forms.CharField(
         required=False,
+        label="เบอร์โทร",
         widget=forms.TextInput(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'เบอร์โทรศัพท์ (ไม่บังคับ)'
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "เบอร์โทรศัพท์ (ไม่บังคับ)"
         })
     )
     address = forms.CharField(
         required=False,
+        label="ที่อยู่",
         widget=forms.Textarea(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'ที่อยู่ (ไม่บังคับ)',
-            'rows': 3
-        })
-    )
-    password1 = forms.CharField(
-        label="Password",
-        widget=forms.PasswordInput(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'รหัสผ่าน'
-        })
-    )
-    password2 = forms.CharField(
-        label="Confirm Password",
-        widget=forms.PasswordInput(attrs={
-            'class': 'w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'placeholder': 'ยืนยันรหัสผ่าน'
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "ที่อยู่ (ไม่บังคับ)",
+            "rows": 3
         })
     )
 
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email', 'phone', 'address']
+        fields = ["username", "first_name", "last_name", "email", "phone", "address"]
 
-    def clean(self):
-        cleaned_data = super().clean()
-        password1 = cleaned_data.get("password1")
-        password2 = cleaned_data.get("password2")
-
-        if password1 or password2:
-            if password1 != password2:
-                raise forms.ValidationError("รหัสผ่านทั้งสองช่องไม่ตรงกัน")
-        return cleaned_data
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        password = self.cleaned_data.get("password1")
-        if password:
-            user.set_password(password)
-        if commit:
-            user.save()
-        return user
+class CustomPasswordChangeForm(PasswordChangeForm):
+    old_password = forms.CharField(
+        label="รหัสผ่านเดิม",
+        widget=forms.PasswordInput(attrs={
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 "
+                     "focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "รหัสผ่านเก่า"
+        })
+    )
+    new_password1 = forms.CharField(
+        label="รหัสผ่านใหม่",
+        widget=forms.PasswordInput(attrs={
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 "
+                     "focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "รหัสผ่านใหม่"
+        })
+    )
+    new_password2 = forms.CharField(
+        label="ยืนยันรหัสผ่านใหม่",
+        widget=forms.PasswordInput(attrs={
+            "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 "
+                     "focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "ยืนยันรหัสผ่านใหม่"
+        })
+    )

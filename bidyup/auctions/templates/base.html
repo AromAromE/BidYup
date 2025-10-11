@@ -16,7 +16,7 @@
   <div class="container mx-auto flex justify-between items-center px-6 py-4">
 
     <a href="/" class="flex items-center space-x-3">
-      <img src="{% static 'images/BidYup.png' %}" alt="BidYup Logo" class="w-12 h-12 rounded-md">
+      <img src="{% static "images/BidYup.png" %}" alt="BidYup Logo" class="w-12 h-12 rounded-md">
       <span class="text-xl font-semibold tracking-wide hover:text-blue-400 transition-colors">BidYup</span>
     </a>
 
@@ -25,13 +25,14 @@
     {% if user.is_authenticated %}
       {% if perms.auctions.add_item %}
         <a href="/create" class="px-3 py-2 hover:text-blue-400 transition">เพิ่มสินค้า</a>
-        <a href="{% url 'myitem' %}" class="px-3 py-2 hover:text-blue-400 transition">สินค้าของฉัน</a>
+        <a href="{% url "myitem" %}" class="px-3 py-2 hover:text-blue-400 transition">สินค้าของฉัน</a>
+        <a href="{% url "status-seller" %}" class="px-3 py-2 hover:text-blue-400 transition">สถานะสินค้า</a>
       {% else %}
         <a href="/my-bids/" class="px-3 py-2 hover:text-blue-400 transition">การประมูลของฉัน</a>
-        <a href="/favorites/" class="px-3 py-2 hover:text-blue-400 transition">รายการโปรด</a>
+        <a href="{% url "favorites" user.pk %}" class="px-3 py-2 hover:text-blue-400 transition">รายการโปรด</a>
+        <a href="{% url "status-buyer" %}" class="px-3 py-2 hover:text-blue-400 transition">สถานะสินค้า</a>
       {% endif %}
-
-      <a href="{% url 'profile' user.pk %}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
+      <a href="{% url "profile" user.pk %}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition transform hover:scale-105">
         {{ user.username }}
       </a>
 
@@ -50,6 +51,9 @@
 <main class="container mx-auto mt-8 px-4">
   {% block content %}
   {% endblock %}
+  {% block script %}
+  {% endblock %}
+
 </main>
 
 </body>

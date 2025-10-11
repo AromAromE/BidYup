@@ -18,7 +18,7 @@
 
     <div class="flex flex-col md:flex-row gap-6">
       {% if item.image %}
-        <img src="{{ item.image.url }}" alt="{{ item.title }}" class="w-full md:w-1/2 h-64 object-cover rounded-lg">
+        <img src="{{ item.image.url }}" alt="{{ item.title }}" class="w-full md:w-1/2 h-100 object-cover rounded-lg">
       {% endif %}
 
       <div class="flex-1">
@@ -31,46 +31,60 @@
         </p>
         <p class="text-gray-400 mb-4">⏰ ปิดประมูล: {{ item.end_time|date:"d/m/Y H:i" }}</p>
 
-      {% if item.status == "active" %}
-          {% if user == item.seller %}
-              <p class="text-yellow-400 mt-2">⚠️ คุณไม่สามารถประมูลสินค้าของตัวเองได้</p>
+        {% if item.status == "active" %}
+            {% if user == item.seller %}
+                <p class="text-yellow-400 mt-2">⚠️ คุณไม่สามารถประมูลสินค้าของตัวเองได้</p>
 
-              <div class="flex flex-col gap-3 mt-4">
-                  <a href="{% url 'update_item' item.id %}" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg text-center transition">
-                      แก้ไขสินค้า
-                  </a>
-                  <form method="GET" action="{% url 'delete_item' item.pk %}">
-                      {% csrf_token %}
-                      <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition">
-                          ลบสินค้า
+                <div class="flex flex-col gap-3 mt-4">
+                    <a href="{% url 'update_item' item.id %}" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg text-center transition">
+                        แก้ไขสินค้า
+                    </a>
+                    <form method="GET" action="{% url 'delete_item' item.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition">
+                            ลบสินค้า
+                        </button>
+                    </form>
+                    <form method="GET" action="{% url 'endlist' item.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 rounded-lg transition">
+                            ปิดการประมูล
+                        </button>
+                    </form>
+                </div>
+            {% else %}
+                {% if perms.auctions.add_bid %}
+                    <form method="POST" class="space-y-3">
+                        {% csrf_token %}
+                        {{ form.amount }}
+                        {% if form.errors.amount %}
+                            <div class="bg-red-600/80 text-white px-4 py-2 rounded-md text-center mt-1">
+                                {{ form.errors.amount.0 }}
+                            </div>
+                        {% endif %}
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition">
+                            เสนอราคา
+                        </button>
+                    </form>
+                  {% if user.is_authenticated and user != item.seller %}
+                  <form method="POST" action="{% url 'toggle_favourite' item.id %}" class="mt-3">
+                    {% csrf_token %}
+                    {% if is_favorite %}
+                      <button type="submit" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 rounded-lg transition">
+                        💔 ลบออกจากรายการโปรด
                       </button>
-                  </form>
-                  <form method="GET" action="{% url 'endlist' item.pk %}">
-                      {% csrf_token %}
-                      <button type="submit" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 rounded-lg transition">
-                          ปิดการประมูล
+                    {% else %}
+                      <button type="submit" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 rounded-lg transition">
+                        ❤️ เพิ่มในรายการโปรด
                       </button>
+                    {% endif %}
                   </form>
-              </div>
-          {% else %}
-              {% if perms.auctions.add_bid %}
-                  <form method="POST" class="space-y-3">
-                      {% csrf_token %}
-                      {{ form.amount }}
-                      {% if form.errors.amount %}
-                          <div class="bg-red-600/80 text-white px-4 py-2 rounded-md text-center mt-1">
-                              {{ form.errors.amount.0 }}
-                          </div>
-                      {% endif %}
-                      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition">
-                          เสนอราคา
-                      </button>
-                  </form>
-              {% endif %}
-          {% endif %}
-      {% else %}
-          <p class="text-red-400 mt-4">🔒 การประมูลนี้ปิดแล้ว</p>
-      {% endif %}
+                  {% endif %}
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <p class="text-red-400 mt-4">🔒 การประมูลนี้ปิดแล้ว</p>
+        {% endif %}
 
       </div>
     </div>
@@ -97,11 +111,9 @@ function updateBids() {
   fetch(`/api/item/{{ item.id }}/current_and_bids/`)
     .then(res => res.json())
     .then(data => {
-      // ราคาปัจจุบัน
       const formattedPrice = Number(data.current_price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
       document.querySelector("#current-bid").innerText = formattedPrice;
     
-      //รีประวัติการบิดทุกๆ 3 วินาที
       const container = document.querySelector("#bid-history");
       container.innerHTML = '';
 

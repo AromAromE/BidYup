@@ -2,7 +2,7 @@ from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db import transaction
-from .models import Item, Bid
+from .models import Item, Order
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -25,7 +25,15 @@ def close_auction(item_id):
         if highest_bid:
             highest_bid.is_winner = True
             highest_bid.save()
-        
+
+        if winner:
+            Order.objects.create(
+                item=item,
+                buyer=winner,
+                payment_status="pending",
+                delivery_status="pending"
+            )
+
         seller = item.seller
 
         if winner:

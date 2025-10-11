@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}ประวัติการประมูลของ {{ user.username }} | BidYup{% endblock %}
+
+{% block content %}
+<section class="py-12 px-6 min-h-screen">
+
+  <h2 class="text-3xl font-bold mb-8 text-center text-blue-400">📜 ประวัติการประมูลของคุณ</h2>
+
+  <!-- Items I bid on -->
+  <h3 class="text-2xl font-semibold text-pink-400 mb-4">💸 สินค้าที่คุณเสนอราคา</h3>
+  {% if bid_items %}
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
+      {% for item in bid_items %}
+      <div class="bg-gray-800/75 rounded-2xl shadow-lg overflow-hidden border border-gray-700 hover:border-pink-500 transition">
+        {% if item.image %}
+          <img src="{{ item.image.url }}" alt="{{ item.title }}" class="w-full h-48 object-cover">
+        {% endif %}
+        <div class="p-4">
+          <h4 class="text-lg font-semibold text-pink-400">{{ item.title }}</h4>
+          <p class="text-gray-400 text-sm">{{ item.description|truncatewords:15 }}</p>
+          <p class="text-gray-300 text-sm">💰 ราคาเริ่มต้น: {{ item.starting_price|intcomma }} บาท</p>
+          <p class="text-gray-300 text-sm">📈 ปัจจุบัน: {{ item.current_price|default:item.starting_price|intcomma }} บาท</p>
+          <a href="{% url 'listing' item.pk %}" class="mt-2 block text-center py-2 bg-pink-600 text-white font-semibold rounded-lg hover:bg-pink-700 transition">
+            ดูรายละเอียด
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-center text-gray-400 mb-10">คุณยังไม่ได้เสนอราคาสินค้าใดๆ 💔</p>
+  {% endif %}
+
+  <h3 class="text-2xl font-semibold text-green-400 mb-4">🏆 สินค้าที่คุณชนะ</h3>
+  {% if won_items %}
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
+      {% for item in won_items %}
+      <div class="bg-gray-800/75 rounded-2xl shadow-lg overflow-hidden border border-gray-700 hover:border-green-500 transition">
+        {% if item.image %}
+          <img src="{{ item.image.url }}" alt="{{ item.title }}" class="w-full h-48 object-cover">
+        {% endif %}
+        <div class="p-4">
+          <h4 class="text-lg font-semibold text-green-400">{{ item.title }}</h4>
+          <p class="text-gray-400 text-sm">{{ item.description|truncatewords:15 }}</p>
+          <p class="text-gray-300 text-sm">ราคาที่ชนะ: {{ item.current_price|intcomma }} บาท</p>
+          <a href="{% url 'listing' item.pk %}" class="mt-2 block text-center py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition">
+            ดูรายละเอียด
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-center text-gray-400 mb-10">คุณยังไม่ได้ชนะการประมูลใดๆ 💔</p>
+  {% endif %}
+
+</section>
+{% endblock %}
