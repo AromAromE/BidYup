@@ -8,7 +8,7 @@
 
     <form method="POST" enctype="multipart/form-data" class="space-y-6">
       {% csrf_token %}
-      
+
       {% if form.non_field_errors %}
         <div class="bg-red-600/80 text-white px-4 py-2 rounded-md text-center">
           {% for error in form.non_field_errors %}
@@ -22,33 +22,41 @@
           <div class="space-y-1">
             <label class="block text-gray-300 font-medium">{{ field.label }}</label>
             {{ field }}
-            {% if field.errors %}
-              {% for error in field.errors %}
-                <p class="text-red-500 text-sm mt-1">{{ error }}</p>
-              {% endfor %}
-            {% endif %}
+            {% for error in field.errors %}
+              <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+            {% endfor %}
           </div>
         {% endif %}
       {% endfor %}
 
-      <div class="space-y-2">
+      <div class="space-y-3">
         <label class="block text-gray-300 font-medium">รูปภาพสินค้า</label>
-        <label for="id_image"
-               class="flex items-center justify-center w-full px-6 py-3 bg-gradient-to-r from-orange-400 to-red-500
-                      hover:from-orange-500 hover:to-red-600 text-white font-semibold rounded-lg
-                      shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer
-                      focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2">
-          📸 เลือกรูปภาพ
-        </label>
+
         {{ form.image }}
-        <img id="preview" class="m-auto mt-3 rounded-lg border max-h-64 object-contain hidden" alt="Preview" />
-        {% if form.image.errors %}
-          {% for error in form.image.errors %}
-            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
-          {% endfor %}
-        {% endif %}
+
+        <label for="id_image"
+              class="inline-flex items-center justify-center w-full px-6 py-3
+                      bg-red-500 hover:bg-red-600 active:bg-red-700
+                      text-white font-semibold rounded-lg shadow-md
+                      transition-colors duration-300 cursor-pointer">
+            📸 เลือกรูปภาพ
+        </label>
+
+        <img id="preview"
+             {% if form.instance.image %}
+             src="{{ form.instance.image.url }}"
+             class="m-auto mt-3 rounded-lg border max-h-64 object-contain"
+             {% else %}
+             class="m-auto mt-3 rounded-lg border max-h-64 object-contain hidden"
+             {% endif %}
+             alt="Preview">
+
+        {% for error in form.image.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+        {% endfor %}
       </div>
 
+      <!-- Submit -->
       <button type="submit"
               class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg
                      shadow-lg transform transition hover:scale-105 active:scale-95">
@@ -61,22 +69,20 @@
 
 {% block script %}
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const fileInput = document.getElementById('id_image');
-  const preview = document.getElementById('preview');
+  document.addEventListener("DOMContentLoaded", () => {
+    const imgInp = document.getElementById('id_image');
+    const previewImg = document.getElementById('preview');
 
-  fileInput.addEventListener('change', () => {
-    const file = fileInput.files[0];
-    if (file) {
-      preview.src = URL.createObjectURL(file);
-      preview.classList.remove('hidden');
-      preview.style.opacity = 0;
-      setTimeout(() => preview.style.opacity = 1, 10);
-    } else {
-      preview.src = '';
-      preview.classList.add('hidden');
-    }
+    imgInp.addEventListener('change', () => {
+      const [file] = imgInp.files;
+      if (file) {
+        previewImg.src = URL.createObjectURL(file);
+        previewImg.classList.remove('hidden');
+      } else {
+        previewImg.classList.add('hidden');
+        previewImg.src = "#";
+      }
+    });
   });
-});
 </script>
 {% endblock %}

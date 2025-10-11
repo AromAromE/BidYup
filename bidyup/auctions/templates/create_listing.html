@@ -58,8 +58,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     imgInp.onchange = evt => {
       const [file] = imgInp.files; 
-      console.log(file)
-      console.log(file)
       if (file) {
         previewImg.src = URL.createObjectURL(file);
         previewImg.classList.remove('hidden');
