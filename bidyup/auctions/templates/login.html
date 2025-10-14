@@ -11,7 +11,7 @@
       {% csrf_token %}
 
       {% if form.non_field_errors %}
-      <div class="bg-red-600/80 text-white px-4 py-2 rounded-md text-center font-semibold">
+      <div class="bg-red-600/80 text-red-600 px-4 py-2 rounded-md text-center font-semibold">
         {% for error in form.non_field_errors %}
           <p>{{ error }}</p>
         {% endfor %}

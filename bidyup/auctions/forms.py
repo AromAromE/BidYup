@@ -133,7 +133,8 @@ class CreateForm(forms.ModelForm):
             }),
             "image": forms.ClearableFileInput(attrs={
                 "class": "hidden",
-                "id": "id_image"
+                "id": "id_image",
+                "required": "required"
             }),
             "end_time": forms.DateTimeInput(attrs={
                 "class": "w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500",

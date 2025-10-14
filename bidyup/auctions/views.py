@@ -1,3 +1,4 @@
+#get_object_or_404 จะไม่ขึ้น 404 ใน debug mode
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth import login, logout
@@ -8,10 +9,10 @@ from django.db.models import Count, Q
 from django.db import transaction
 
 from django.contrib import messages
-from django.contrib.auth.views import PasswordChangeView
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+
 
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
@@ -38,7 +39,7 @@ class IndexView(View):
         if category_id:
             items = items.filter(category_id=category_id)
 
-        categories = Category.objects.annotate(ic=Count('items', filter=Q(items__status='active')))
+        categories = Category.objects.annotate(ic=Count("items", filter=Q(items__status="active")))
 
         return render(request, "index.html", {"items": items, "categories": categories,})
 
@@ -49,13 +50,13 @@ class RegisterView(View):
 
     def post(self, request):
         form = RegisterForm(request.POST)
-        if form.is_valid():
+        if form.is_valid(): 
             user = form.save(commit=False)
             user.role = form.cleaned_data.get("role")
             user.save()
 
             role = form.cleaned_data.get("role")
-            group, created = Group.objects.get_or_create(name=role.capitalize())
+            group = Group.objects.get(name=role.capitalize())
             user.groups.add(group)
 
             return redirect("login")
@@ -109,7 +110,7 @@ class ListingDetailView(LoginRequiredMixin, View):
         item = get_object_or_404(Item, pk=pk)
         bids = item.bids.order_by("-amount")
         form = BidForm(current_price=item.current_price or item.starting_price)
-        is_favorite = request.user.is_authenticated and item.favorites.filter(id=request.user.id).exists()
+        is_favorite = item.favorites.filter(id=request.user.id).exists()
         return render(request, "listing.html", {"item": item, "bids": bids, "form": form, "is_favorite": is_favorite})
 
     def post(self, request, pk):
@@ -126,10 +127,11 @@ class ListingDetailView(LoginRequiredMixin, View):
             bid.bidder = request.user
 
             with transaction.atomic():
+                #select_for_update() จะล็อกแถวของ item นี้ในฐานข้อมูลจนกว่าทรานแซคชันจะเสร็จ
                 item = Item.objects.select_for_update().get(pk=item.pk)
                 bid.save()
                 item.current_price = bid.amount
-                item.save() 
+                item.save()
 
             messages.success(request, f"✅ เสนอราคา {bid.amount} บาท สำเร็จ!")
 
@@ -137,29 +139,31 @@ class ListingDetailView(LoginRequiredMixin, View):
 
         bids = item.bids.order_by("-amount")
         return render(request, "listing.html", { "item": item, "bids": bids, "form": form, })
+
 class UpdateItemView(LoginRequiredMixin, View):
     def get(self, request, pk):
-        item = Item.objects.get(pk=pk)
-        form = CreateForm(instance=item)
-
+        item = get_object_or_404(Item, pk=pk)
         if item.seller != request.user:
             raise PermissionDenied
-    
+        form = CreateForm(instance=item)
         return render(request, "update_item.html", {"form": form, "item": item})
     
     def post(self, request, pk):
+        print("POST received")
         item = get_object_or_404(Item, pk=pk)
+        if item.seller != request.user:
+            raise PermissionDenied
         form = CreateForm(request.POST, request.FILES, instance=item)
         if form.is_valid():
             form.save()
             return redirect("listing", pk=item.pk)
-        return render(request, "update_item.html", {"form": form, "pk": pk})
+        return render(request, "update_item.html", {"form": form, "item": item})
 
 class DeleteItemView(LoginRequiredMixin, View):
     def get(self, request, pk):
         item = get_object_or_404(Item, pk=pk)
 
-        if item.seller != request.user and not request.user.is_staff:
+        if item.seller != request.user:
             raise PermissionDenied
 
         return render(request, "delete_item.html", {"item": item})
@@ -167,7 +171,7 @@ class DeleteItemView(LoginRequiredMixin, View):
     def post(self, request, pk):
         item = get_object_or_404(Item, pk=pk)
 
-        if item.seller != request.user and not request.user.is_staff:
+        if item.seller != request.user:
             raise PermissionDenied
     
         item.delete()
@@ -281,7 +285,7 @@ def CurrentdBidsAPIView(request, item_id):
 class MyItemView(PermissionRequiredMixin, View):
     permission_required = ["auctions.add_item"]
     def get(self, request):
-        items = Item.objects.filter(status="active", seller=request.user).order_by("-created_at")
+        items = Item.objects.filter(seller=request.user).order_by("-created_at")
         return render(request, "myitem.html", {"items": items})
 
 class MyBidView(LoginRequiredMixin, View):
@@ -314,20 +318,25 @@ class ProfileView(LoginRequiredMixin, View):
         return render(request, "profile.html", {"form": form, "user": user})
 
 
-class ChangePasswordView(PasswordChangeView):
-    form_class = CustomPasswordChangeForm
-    template_name = 'change_password.html'
+class ChangePasswordView(LoginRequiredMixin, View):
+    def get(self, request):
+        form = CustomPasswordChangeForm(user=request.user)
+        return render(request, "change_password.html", {"form": form})
 
-    def get_success_url(self):
-        messages.success(self.request, "เปลี่ยนรหัสผ่านเรียบร้อยแล้ว!")
-        return redirect('index')
+    def post(self, request):
+        form = CustomPasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            logout(request)
+            return redirect("login")
+        return render(request, "change_password", {"form": form})
 
 class FavouriteView(LoginRequiredMixin, View):
     def get(self, request, pk):
         if pk != request.user.pk:
             raise PermissionDenied
         user = get_object_or_404(User, pk=pk)
-        favourites = Item.objects.filter(favorites=user).order_by('-created_at')
+        favourites = Item.objects.filter(favorites=user).order_by("-created_at")
         return render(request, "favorites.html", {"user": user, "favourites": favourites})
 
     
@@ -341,7 +350,7 @@ class ToggleFavouriteView(LoginRequiredMixin, PermissionRequiredMixin, View):
         else:
             item.favorites.add(user)
 
-        return redirect('listing', pk=pk)
+        return redirect("listing", pk=pk)
     
 class SellerStatusView(LoginRequiredMixin, View):
     def get(self, request):

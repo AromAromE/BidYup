@@ -6,6 +6,16 @@
   <div class="w-full max-w-md bg-gray-800/80 rounded-2xl shadow-xl p-8 border border-gray-700">
     <h2 class="text-3xl font-bold text-blue-400 mb-6 text-center">โปรไฟล์ของ {{ user.username }}</h2>
 
+      {% if messages %}
+      {% for message in messages %}
+        <div class="mb-4 px-4 py-2 rounded-md text-center 
+                    {% if message.tags == 'success' %} text-green-500{% endif %}
+                    {% if message.tags == 'error' %}text-red-500{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
     <form method="post">
       {% csrf_token %}
       {% for field in form %}
@@ -32,7 +42,7 @@
         {% endfor %}
       </div>
     {% endif %}
-     <a href="{% url 'change_password' request.user.pk %}" class="text-blue-400 hover:text-blue-300 font-medium transition">
+     <a href="{% url 'change_password' %}" class="text-blue-400 hover:text-blue-300 font-medium transition">
         เปลี่ยนรหัสผ่าน
       </a>
       <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition">
