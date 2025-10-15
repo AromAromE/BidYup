@@ -369,7 +369,6 @@ class SellerStatusView(LoginRequiredMixin, View):
 
         order.payment_status = "confirmed"
         order.save()
-        messages.success(request, f"✅ ทำเครื่องหมายชำระเงินเรียบร้อย: {order.item.title}")
         return redirect("status-seller")
 
 
@@ -390,6 +389,5 @@ class BuyerStatusView(LoginRequiredMixin, View):
 
         order.delivery_status = "delivered"
         order.save()
-        messages.success(request, f"✅ ทำเครื่องหมายได้รับสินค้าเรียบร้อย: {order.item.title}")
         return redirect("status-buyer")
 

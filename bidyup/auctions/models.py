@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 
 # ใช้ User เองแทน Django default
 class User(AbstractUser):
+    email = models.EmailField(unique=True)
     ROLE_CHOICES = (
         ('Seller', 'Seller'),
         ('Bidder', 'Bidder'),
